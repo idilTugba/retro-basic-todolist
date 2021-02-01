@@ -1,15 +1,49 @@
 "use script;"
 
-let items = ["item 1","item 2","item 3","item 4","Lorem loedf sdmksdfsd kisprum spritidmcsd spiritualized"],
+let items,
     listContent = document.querySelector('.list-container__list-content');
 
-    if(document.cookie){
-        console.log(document.cookie);
-    }
+   
 
-items.forEach(function(i){
-    createItem(i);
-});
+//localStorage.clear();
+loadItems();
+
+
+function loadItems(){
+    items = getItemsFromLS();
+    items.forEach(function(i){
+        createItem(i);
+    });
+}
+
+//get LocalStorage
+function getItemsFromLS(){
+    if(localStorage.getItem('items') === null){
+        items = [];
+    }else{
+        items = JSON.parse(localStorage.getItem('items'));
+    }
+    return items;
+}
+
+//set LocalStorage
+function setItemsToLS(text){
+    items = getItemsFromLS();
+    items.push(text);
+    localStorage.setItem('items', JSON.stringify(items));
+}
+
+//delete item from LocalStrage
+function deleteItemFromLS(e){
+    items = getItemsFromLS();
+    items.forEach(function(item,index){
+        if(item === e){
+            items.splice(index,1);
+        }
+    })
+    localStorage.setItem('items',JSON.stringify(items));
+    
+}
 
 //create list items and close buttons
 function createItem(i){
@@ -26,10 +60,11 @@ function createItem(i){
 
     span.onclick = function(){
         this.parentElement.classList.remove('list-item-delete');
-        this.parentElement.style.display="none";
+        this.parentElement.remove();
+        deleteItemFromLS(this.parentElement.textContent);
     }
 }
-
+ 
 //add toggle class for each div
 listContent.addEventListener('click',function(listItem){
     if(listItem.target.tagName == 'DIV'){
@@ -53,9 +88,10 @@ deleteAllButton.onclick = function(){
     var allList = document.querySelectorAll('.list-item-delete');
     allList.forEach(function(i){
         i.classList.remove('list-item-delete');
-        i.style.display = "none";
+        i.remove();
     })
     listContent.classList.remove('list-content-delete');
+    localStorage.clear();
 }
 
 //add new item
@@ -66,13 +102,9 @@ addNewItemButton.addEventListener('click',function(){
     let newItem = addNewItemInput.value;
     if(newItem){
        createItem(newItem);
+
+       setItemsToLS(newItem);
     }
+    
 });
 
-
-window.addEventListener('beforeunload', (event) => {
-  let cookieData = document.querySelectorAll('list-container__list-item'),
-      newDate = new Date();
-      date = newDate.toLocaleTimeString();
-  document.cookie = "data="+cookieData+'; expires='+date;
-})
